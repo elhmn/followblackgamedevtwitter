@@ -27,16 +27,18 @@ get_bearer_token() {
   	  "https://api.twitter.com/oauth2/token" 2>/dev/null | jq .access_token
 }
 
+REQUEST_METHOD="GET"
 ACCESS_TOKEN=$(cat .secrets | grep access_token= | cut -d "=" -f2)
+ACCESS_TOKEN_SECRET=$(cat .secrets | grep access_token_secret= | cut -d "=" -f2)
 BEARER_TOKEN=$(get_bearer_token | tr -d "\"")
 OAUTH_NONCE=$(date | md5 | head -c32; echo)
 OAUTH_CONSUMER_KEY=$APIKEY
 OAUTH_TIMESTAMP=$(date "+%s")
-OAUTH_TOKEN=$($ACCESS_TOKEN)
+OAUTH_TOKEN=$ACCESS_TOKEN
 OAUTH_VERSION="1.0"
 OAUTH_SIGNATURE_METHOD=HMAC-SHA1
 OAUTH_SIGNATURE=""
-REQUEST_PARAMETER="q=soccer"
+REQUEST_PARAMETER="q="
 
 keys=(
 	oauth_consumer_key
@@ -57,16 +59,7 @@ req="
   oauth_version=\"$OAUTH_VERSION\"
 "
 
-curl -vsS -X GET \
-  -H "authorization: OAuth
-  oauth_consumer_key=\"$OAUTH_CONSUMER_KEY\",
-  oauth_nonce=\"$OAUTH_NONCE\",
-  oauth_signature=\"$OAUTH_SIGNATURE\",
-  oauth_signature_method=\"$OAUTH_SIGNATURE_METHOD\",
-  oauth_timestamp=\"$OAUTH_TIMESTAMP\",
-  oauth_token=\"$ACCESS_TOKEN\",
-  oauth_version=\"$OAUTH_VERSION\"" \
-  https://api.twitter.com/1.1/users/search.json?$REQUEST_PARAMETER
+REQUEST_URL=https://api.twitter.com/1.1/users/search.json?$REQUEST_PARAMETER
 
 SORTED_KEYS=$(echo ${keys[@]} | tr -s " " "\n" | sort)
 # echo $SORTED_KEYS
@@ -77,4 +70,20 @@ for k in $SORTED_KEYS; do
 	signature="$signature&$k=$val"
 done;
 
+signature="$REQUEST_METHOD&$(_encode $REQUEST_URL)&$(_encode $signature)"
+
 echo $signature
+
+OAUTH_SIGNATURE=$(echo -n $signature | openssl sha1 -hmac "$(_encode $APIKEY_SECRET)&$(_encode $ACCESS_TOKEN_SECRET)")
+OAUTH_SIGNATURE=$(echo $OAUTH_SIGNATURE | base64)
+
+curl -vsS -X $REQUEST_METHOD \
+  -H "authorization: OAuth
+  oauth_consumer_key=\"$OAUTH_CONSUMER_KEY\",
+  oauth_nonce=\"$OAUTH_NONCE\",
+  oauth_signature=\"$OAUTH_SIGNATURE\",
+  oauth_signature_method=\"$OAUTH_SIGNATURE_METHOD\",
+  oauth_timestamp=\"$OAUTH_TIMESTAMP\",
+  oauth_token=\"$ACCESS_TOKEN\",
+  oauth_version=\"$OAUTH_VERSION\"" \
+  $REQUEST_URL
