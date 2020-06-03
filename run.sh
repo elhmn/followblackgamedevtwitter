@@ -29,7 +29,7 @@ fi
 
 for black in $(get_black_devs); do
 	echo "black game dev : $black"
-	data=$(twurl "/1.1/users/lookup.json?screen_name=$black")
-	echo $data | jq  >> users.json
-	echo $data | jq ".[0].id"  >>ids.json
+	id=$(twurl "/1.1/users/lookup.json?screen_name=$black" | jq '.[0].id')
+	twurl -X POST "/1.1/friendships/create.json?user_id=$id&follow=true"
+	echo ""
 done
