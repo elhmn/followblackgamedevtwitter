@@ -1,11 +1,11 @@
 # followblackgamedevtwitter
-bash script to follow black game dev from twitter
+Bash script to follow black game devs from twitter
 listed in http://www.blackgamedevs.com/
 check the website and maybe add yourself [here](https://github.com/QuantumBox/blackgamedevs)
 
 ## requirements
 
-Before running the scripts make sure that you have a twitter dev account and 
+Before running the script make sure that you have a twitter dev account and 
 install the following dependencies:
 - `twurl` install, check out [this page](https://github.com/twitter/twurl#installing-twurl)
 - `jq` [here](https://stedolan.github.io/jq/)
@@ -46,5 +46,9 @@ Go to https://api.twitter.com/oauth/authorize?oauth_consumer_key=<apikey>&oauth_
 and paste in the supplied PIN
 ```
 
-Once it the pin was provided to the scripts it will then follow the =~ 200 devs listed
+Once the pin was provided to the script it will then start following the =~ 200 devs listed
 in http://www.blackgamedevs.com/ that has provided a twitter account
+
+<p align="center">
+<img src="./.res/follow.gif" width="600" height="600"/>
+<p>
