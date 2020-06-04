@@ -23,12 +23,6 @@ APIKEY_SECRET=$(cat .secrets | grep APIKEY_SECRET= | cut -d "=" -f2)
 ACCESS_TOKEN=$(cat .secrets | grep access_token= | cut -d "=" -f2)
 ACCESS_TOKEN_SECRET=$(cat .secrets | grep access_token_secret= | cut -d "=" -f2)
 
-get_bearer_token() {
-	curl -u "$APIKEY:$APIKEY_SECRET" \
-  	  --data "grant_type=client_credentials" \
-  	  "https://api.twitter.com/oauth2/token" 2>/dev/null | jq .access_token
-}
-
 if [[ ! -f ".authenticated" ]]; then
 	twurl authorize --consumer-key $APIKEY    \
                 --consumer-secret $APIKEY_SECRET
